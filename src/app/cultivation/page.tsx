@@ -1,99 +1,103 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Flame, Mountain, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import {
+  Flame,
+  Mountain,
+  ShieldCheck,
+  Sparkles
+} from "lucide-react";
 
 import { PageHeading } from "@/components/game/page-heading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
-  character,
   cultivationActions,
   cultivationPlaces
 } from "@/data/mock-player";
 
-const energyOptions = [10, 50, 100];
-
 export default function CultivationPage() {
   const [selectedPlaceId, setSelectedPlaceId] = useState(cultivationPlaces[0].id);
   const [selectedActionId, setSelectedActionId] = useState(cultivationActions[0].id);
-  const [selectedEnergy, setSelectedEnergy] = useState(50);
+  const [energyWeeks, setEnergyWeeks] = useState("50");
 
   const selectedPlace = cultivationPlaces.find((place) => place.id === selectedPlaceId) ?? cultivationPlaces[0];
   const selectedAction =
     cultivationActions.find((action) => action.id === selectedActionId) ?? cultivationActions[0];
+  const selectedEnergy = Math.max(0, Number.parseInt(energyWeeks, 10) || 0);
 
-  const estimate = useMemo(() => {
-    const isFocus = selectedAction.id === "focus";
-    const isWild = selectedPlace.type === "wild";
-    const cultivationGain = isFocus
-      ? selectedEnergy
-      : Math.round(selectedEnergy * (selectedAction.id === "mana" ? 0.45 : 0.38));
-    const mindGain = isFocus ? selectedEnergy * 5 : Math.round(selectedEnergy * 2.5);
-
-    return {
-      cultivation: isWild
-        ? `${Math.round(cultivationGain * 0.8)} - ${Math.round(cultivationGain * 1.2)}`
-        : String(cultivationGain),
-      mind: isWild ? `${Math.round(mindGain * 0.8)} - ${Math.round(mindGain * 1.2)}` : String(mindGain),
-      daoHeart: selectedPlace.daoHeartChange ?? "无明显变化",
-      risk: selectedPlace.risk ?? "无伤势风险"
-    };
-  }, [selectedAction.id, selectedEnergy, selectedPlace]);
-
-  const cultivationProgress = Math.round(
-    (character.cultivation / character.cultivationRequired) * 100
-  );
+  const safePlaces = cultivationPlaces.filter((place) => place.type === "safe");
+  const wildPlaces = cultivationPlaces.filter((place) => place.type === "wild");
 
   return (
     <>
       <PageHeading
-        eyebrow="修炼"
-        title="命元入道，稳步长生"
-        description="选择修炼场所、修炼行为和消耗命元数量，查看本次收益预估。第一阶段仅展示 UI 与本地预估。"
-        badge="mock data"
+        title="修炼"
+        description="命元入道，稳步长生"
       />
 
-      <section className="grid gap-4 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
+      <section>
+        <Card>
           <CardHeader>
-            <h2 className="text-base font-semibold text-ink-900">当前修炼状态</h2>
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <h2 className="text-base font-semibold text-ink-900">修行方向</h2>
+              <span className="text-xs text-stone-500">选择方向，输入本次消耗命元周数</span>
+            </div>
           </CardHeader>
           <CardBody>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {[
-                ["当前境界", character.realm],
-                ["当前命元", `${character.energy} / ${character.energyMax} 周`],
-                ["当前道心", `${character.daoHeartState} ${character.daoHeart}`],
-                ["当前伤势", character.injuryState],
-                ["当前心神", String(character.mind)],
-                ["命元恢复", character.energyRecovery]
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-md bg-rice-100 px-3 py-2">
-                  <p className="text-xs text-stone-500">{label}</p>
-                  <p className="mt-1 text-sm font-semibold text-ink-900">{value}</p>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {cultivationActions.map((action) => {
+                const selected = selectedActionId === action.id;
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <h2 className="text-base font-semibold text-ink-900">境界进度</h2>
-          </CardHeader>
-          <CardBody>
-            <div className="mb-2 flex justify-between text-sm">
-              <span>{character.realm}</span>
-              <span>
-                {character.cultivation} / {character.cultivationRequired}
-              </span>
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className={cn(
+                      "min-h-[138px] rounded-lg border bg-rice-50 px-3 py-3 text-left transition",
+                      selected
+                        ? "border-jade-600 bg-jade-50/70 shadow-[0_10px_28px_rgba(23,82,68,0.12)] ring-2 ring-jade-500/15"
+                        : "border-stone-200 hover:border-jade-500 hover:bg-white"
+                    )}
+                    onClick={() => setSelectedActionId(action.id)}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-md bg-ink-800 text-rice-50">
+                        <Sparkles className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                      {action.recommended ? <Badge tone="jade">推荐</Badge> : null}
+                    </div>
+                    <h3 className="mt-3 text-sm font-semibold text-ink-900">{action.name}</h3>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-stone-600">
+                      {action.description}
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-jade-700">{action.baseYield}</p>
+                  </button>
+                );
+              })}
             </div>
-            <Progress value={cultivationProgress} />
-            <p className="mt-3 text-sm text-stone-600">目标：{character.nextRealm}</p>
+
+            <div className="mt-5 grid gap-3 border-t border-stone-200 pt-4 md:grid-cols-[minmax(180px,260px)_auto_minmax(0,1fr)] md:items-end">
+              <label className="block">
+                <span className="text-xs text-stone-500">修炼周数</span>
+                <input
+                  className="mt-1 h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm font-semibold text-ink-900 outline-none transition focus:border-jade-600 focus:ring-2 focus:ring-jade-500/15"
+                  inputMode="numeric"
+                  min={1}
+                  type="number"
+                  value={energyWeeks}
+                  onChange={(event) => setEnergyWeeks(event.target.value)}
+                />
+              </label>
+              <Button icon={Flame} variant="primary" className="h-10 px-5">
+                开始修炼
+              </Button>
+              <div className="text-xs leading-5 text-stone-500">
+                当前选择：{selectedAction.name}，预计消耗命元 {selectedEnergy} 周。
+              </div>
+            </div>
           </CardBody>
         </Card>
       </section>
@@ -103,171 +107,69 @@ export default function CultivationPage() {
           <h2 className="text-lg font-semibold text-ink-900">修炼场所</h2>
           <span className="text-xs text-stone-500">安全场所收益稳定，野外场所有风险</span>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {cultivationPlaces.map((place) => {
-            const selected = selectedPlaceId === place.id;
-            const Icon = place.type === "safe" ? ShieldCheck : Mountain;
-
-            return (
-              <button
-                key={place.id}
-                type="button"
-                className={cn(
-                  "min-h-[210px] rounded-lg border bg-white/78 p-4 text-left shadow-panel transition",
-                  selected ? "border-jade-600 ring-2 ring-jade-500/20" : "border-stone-200 hover:border-jade-500",
-                  !place.unlocked && "opacity-65"
-                )}
-                onClick={() => place.unlocked && setSelectedPlaceId(place.id)}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-md bg-ink-800 text-rice-50">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <Badge tone={place.type === "wild" ? "cinnabar" : place.unlocked ? "jade" : "muted"}>
-                    {place.type === "wild" ? "野外修炼" : place.unlocked ? "安全修炼" : "未解锁"}
-                  </Badge>
-                </div>
-                <h3 className="mt-4 text-base font-semibold text-ink-900">{place.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-600">{place.description}</p>
-                <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-md bg-rice-100 px-3 py-2">
-                    <p className="text-stone-500">收益倍率</p>
-                    <p className="mt-1 font-semibold text-ink-900">{place.multiplier}</p>
-                  </div>
-                  <div className="rounded-md bg-rice-100 px-3 py-2">
-                    <p className="text-stone-500">道心影响</p>
-                    <p className="mt-1 font-semibold text-ink-900">{place.daoHeartChange ?? "待解锁"}</p>
-                  </div>
-                </div>
-                {place.risk ? <p className="mt-3 text-xs font-medium text-cinnabar-700">{place.risk}</p> : null}
-                {place.requirement ? <p className="mt-3 text-xs text-stone-500">{place.requirement}</p> : null}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <Card>
-          <CardHeader>
-            <h2 className="text-base font-semibold text-ink-900">修炼行为选择</h2>
-          </CardHeader>
-          <CardBody>
-            <div className="grid gap-3 md:grid-cols-2">
-              {cultivationActions.map((action) => {
-                const selected = selectedActionId === action.id;
-
-                return (
-                  <button
-                    key={action.id}
-                    type="button"
-                    className={cn(
-                      "rounded-lg border bg-white/70 p-4 text-left transition",
-                      selected ? "border-jade-600 ring-2 ring-jade-500/20" : "border-stone-200 hover:border-jade-500"
-                    )}
-                    onClick={() => setSelectedActionId(action.id)}
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-sm font-semibold text-ink-900">{action.name}</h3>
-                      {action.recommended ? <Badge tone="jade">推荐</Badge> : null}
-                    </div>
-                    <p className="mt-2 text-xs leading-5 text-stone-600">{action.description}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Badge tone="muted">{action.baseYield}</Badge>
-                      <Badge tone="amber">{action.sideYield}</Badge>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </CardBody>
-        </Card>
-
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <h2 className="text-base font-semibold text-ink-900">消耗命元数量</h2>
-            </CardHeader>
-            <CardBody>
-              <div className="grid grid-cols-3 gap-2">
-                {energyOptions.map((option) => (
-                  <Button
-                    key={option}
-                    variant={selectedEnergy === option ? "primary" : "secondary"}
-                    onClick={() => setSelectedEnergy(option)}
-                  >
-                    {option} 周
-                  </Button>
-                ))}
+          {[
+            { title: "安全修炼", places: safePlaces, icon: ShieldCheck },
+            { title: "野外修炼", places: wildPlaces, icon: Mountain }
+          ].map((group) => (
+            <div key={group.title} className="rounded-lg border border-stone-200 bg-white/72 p-3 shadow-panel">
+              <div className="mb-3 flex items-center gap-2">
+                <group.icon className="h-4 w-4 text-jade-700" aria-hidden="true" />
+                <h3 className="text-sm font-semibold text-ink-900">{group.title}</h3>
               </div>
-              <p className="mt-3 text-xs leading-5 text-stone-500">
-                当前命元 {character.energy} 周，超过可用命元的选项后续接入接口时应禁用。
-              </p>
-            </CardBody>
-          </Card>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10">
+                {group.places.map((place) => {
+                  const selected = selectedPlaceId === place.id;
+                  const Icon = place.type === "safe" ? ShieldCheck : Mountain;
 
-          <Card className={selectedPlace.type === "wild" ? "border-cinnabar-500/40" : undefined}>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-semibold text-ink-900">结果预估</h2>
-                {selectedPlace.type === "wild" ? (
-                  <Badge tone="cinnabar">风险行为</Badge>
-                ) : (
-                  <Badge tone="jade">稳定收益</Badge>
-                )}
+                  return (
+                    <button
+                      key={place.id}
+                      type="button"
+                      className={cn(
+                        "aspect-square rounded-lg border bg-rice-50 p-3 text-center transition",
+                        selected
+                          ? "sm:col-span-2 border-jade-600 bg-white shadow-[0_14px_32px_rgba(23,82,68,0.12)] ring-2 ring-jade-500/15"
+                          : "border-stone-200 hover:border-jade-500 hover:bg-white",
+                        !place.unlocked && "cursor-not-allowed opacity-60"
+                      )}
+                      onClick={() => place.unlocked && setSelectedPlaceId(place.id)}
+                    >
+                      <div className="flex h-full flex-col items-center justify-center">
+                        <span
+                          className={cn(
+                            "flex items-center justify-center rounded-md bg-ink-800 text-rice-50 transition",
+                            selected ? "h-12 w-12" : "h-10 w-10"
+                          )}
+                        >
+                          <Icon className={selected ? "h-6 w-6" : "h-5 w-5"} aria-hidden="true" />
+                        </span>
+                        <h4 className="mt-3 text-sm font-semibold text-ink-900">{place.name}</h4>
+                        {selected ? (
+                          <div className="mt-2 space-y-1 text-xs leading-4 text-stone-600">
+                            <p>
+                              <span className="text-stone-500">修炼效率：</span>
+                              <span className="font-medium text-ink-900">{place.multiplier}</span>
+                            </p>
+                            <p>
+                              <span className="text-stone-500">道心变化：</span>
+                              <span className="font-medium text-ink-900">
+                                {place.daoHeartChange ?? place.requirement ?? "收益稳定"}
+                              </span>
+                            </p>
+                            {place.risk ? <p className="font-medium text-cinnabar-700">{place.risk}</p> : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            </CardHeader>
-            <CardBody>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between gap-3">
-                  <span className="text-stone-500">修炼场所</span>
-                  <span className="font-semibold text-ink-900">{selectedPlace.name}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-stone-500">修炼行为</span>
-                  <span className="font-semibold text-ink-900">{selectedAction.name}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-stone-500">预计消耗</span>
-                  <span className="font-semibold text-cinnabar-700">命元 -{selectedEnergy} 周</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-stone-500">预计修为</span>
-                  <span className="font-semibold text-jade-700">+{estimate.cultivation}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-stone-500">预计心神</span>
-                  <span className="font-semibold text-jade-700">+{estimate.mind}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-stone-500">道心影响</span>
-                  <span className="font-semibold text-ink-900">{estimate.daoHeart}</span>
-                </div>
-              </div>
-
-              <div
-                className={cn(
-                  "mt-4 flex gap-3 rounded-lg border p-3 text-sm",
-                  selectedPlace.type === "wild"
-                    ? "border-cinnabar-500/25 bg-cinnabar-100/45 text-cinnabar-700"
-                    : "border-jade-500/25 bg-jade-50 text-jade-700"
-                )}
-              >
-                {selectedPlace.type === "wild" ? (
-                  <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden="true" />
-                ) : (
-                  <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-                )}
-                <span>{estimate.risk}</span>
-              </div>
-
-              <Button className="mt-4 w-full" icon={Flame} variant="primary">
-                开始修炼
-              </Button>
-            </CardBody>
-          </Card>
+            </div>
+          ))}
         </div>
       </section>
+
     </>
   );
 }

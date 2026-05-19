@@ -1,6 +1,9 @@
 import {
+  Brain,
   Flame,
   Home,
+  Package,
+  Leaf,
   UserRound
 } from "lucide-react";
 
@@ -11,6 +14,9 @@ import type {
   CultivationPlace,
   GameLog,
   GrowthStat,
+  GatheringPlace,
+  InventoryItem,
+  MindPracticeDirection,
   NavigationItem,
   ResourceSummary
 } from "@/types/game";
@@ -26,9 +32,11 @@ export const character: CharacterProfile = {
   lifespanText: "63年42周",
   remainingLifespanWeeks: 3310,
   lifespanWeeks: 3328,
-  energy: 100,
+  energy: 72,
   energyMax: 100,
   energyNextRecoveryIn: "08:12",
+  energyRecoveryRemainingSeconds: 512,
+  energyRecoveryAmountWeeks: 4,
   energyRecovery: "每 10 分钟恢复 4 周",
   energyFullIn: "约 5天14时",
   mind: 250,
@@ -223,10 +231,181 @@ export const growthStats: GrowthStat[] = [
   { label: "累计突破次数", value: "2 次", detail: "失败 0 次" }
 ];
 
+export const mindPracticeDirections: MindPracticeDirection[] = [
+  {
+    id: "gathering",
+    name: "采集",
+    description: "消耗心神，采集灵草、灵矿和低阶杂物。",
+    unlocked: true
+  },
+  {
+    id: "alchemy",
+    name: "炼丹",
+    description: "开炉炼制丹药，消耗材料与心神。",
+    unlocked: false,
+    requirement: "丹炉与基础丹方未解锁"
+  },
+  {
+    id: "crafting",
+    name: "炼器",
+    description: "制作工具和器物，首版暂未开放。",
+    unlocked: false,
+    requirement: "炼器台未解锁"
+  },
+  {
+    id: "talisman",
+    name: "符道",
+    description: "绘制符箓，处理一次性增益与防护。",
+    unlocked: false,
+    requirement: "符纸来源未解锁"
+  }
+];
+
+export const gatheringPlaces: GatheringPlace[] = [
+  {
+    id: "green-sprout-slope",
+    name: "青芽坡",
+    unlocked: true,
+    description: "坊市外最常见的灵草坡地，适合练气初期采集。",
+    mindCost: 20,
+    mainYield: "青芽草、甘露花",
+    rareYield: "凝露叶",
+    risk: "无明显风险"
+  },
+  {
+    id: "mist-bamboo-grove",
+    name: "雾竹林",
+    unlocked: true,
+    description: "晨雾不散的竹林，常有清心类草药生长。",
+    mindCost: 30,
+    mainYield: "雾竹叶、清心草",
+    rareYield: "玉节竹芯"
+  },
+  {
+    id: "broken-stone-beach",
+    name: "碎石滩",
+    unlocked: true,
+    description: "溪边碎石中偶有低阶灵矿，杂物也不少。",
+    mindCost: 25,
+    mainYield: "碎灵矿、无用碎石",
+    rareYield: "水纹石"
+  },
+  {
+    id: "cold-dew-valley",
+    name: "寒露谷",
+    unlocked: false,
+    description: "谷内寒露凝结，适合寻找阴寒类材料。",
+    mindCost: 45,
+    mainYield: "寒露草、霜纹叶",
+    requirement: "练气四层后开放"
+  },
+  {
+    id: "red-sand-ridge",
+    name: "赤砂岭",
+    unlocked: false,
+    description: "赤砂中藏有火性矿物，但容易消耗更多心神。",
+    mindCost: 50,
+    mainYield: "赤砂矿、火纹石",
+    risk: "轻微灼伤风险",
+    requirement: "体魄 130 后开放"
+  },
+  {
+    id: "old-medicine-field",
+    name: "旧药田",
+    unlocked: false,
+    description: "废弃药田仍有残存灵苗，偶见稀有草种。",
+    mindCost: 60,
+    mainYield: "残灵苗、旧药根",
+    rareYield: "回春芽",
+    requirement: "完成坊市委托后开放"
+  }
+];
+
+export const inventoryItems: InventoryItem[] = [
+  {
+    id: "minor-cultivation-pill",
+    name: "小培元丹",
+    type: "丹药",
+    grade: "凡品",
+    quantity: 3,
+    description: "低阶修为丹药，适合练气初期服用。",
+    usable: true,
+    sellable: true
+  },
+  {
+    id: "healing-pill",
+    name: "止血散",
+    type: "丹药",
+    grade: "凡品",
+    quantity: 2,
+    description: "处理轻微伤势的常见药散。",
+    usable: true,
+    sellable: true
+  },
+  {
+    id: "green-sprout-grass",
+    name: "青芽草",
+    type: "灵草",
+    grade: "一阶",
+    quantity: 12,
+    description: "最常见的低阶灵草，可作为炼丹辅材。",
+    usable: false,
+    sellable: true
+  },
+  {
+    id: "sweet-dew-flower",
+    name: "甘露花",
+    type: "灵草",
+    grade: "一阶",
+    quantity: 5,
+    description: "花瓣含有清甜灵露，常用于温养类丹方。",
+    usable: false,
+    sellable: true
+  },
+  {
+    id: "spirit-ore-chip",
+    name: "碎灵矿",
+    type: "灵矿",
+    grade: "一阶",
+    quantity: 8,
+    description: "含少量灵气的矿石碎片，可用于炼器入门。",
+    usable: false,
+    sellable: true
+  },
+  {
+    id: "herb-hoe",
+    name: "药锄",
+    type: "工具",
+    grade: "凡器",
+    quantity: 1,
+    description: "采集灵草时使用的基础工具。",
+    usable: false,
+    sellable: false
+  },
+  {
+    id: "stone-dust",
+    name: "无用碎石",
+    type: "杂物",
+    grade: "杂物",
+    quantity: 16,
+    description: "采集时混入背包的普通碎石，坊市仍可低价收购。",
+    usable: false,
+    sellable: true
+  }
+];
+
 export const navigationItems: NavigationItem[] = [
   { label: "总览", href: "/", icon: Home },
   { label: "修炼", href: "/cultivation", icon: Flame },
+  { label: "心神", href: "/mind", icon: Brain },
+  { label: "行囊", href: "/inventory", icon: Package },
   { label: "角色", href: "/character", icon: UserRound }
 ];
 
-export const mobileNavigationItems: NavigationItem[] = navigationItems;
+export const mobileNavigationItems: NavigationItem[] = [
+  navigationItems[0],
+  navigationItems[1],
+  { label: "心神", href: "/mind", icon: Leaf },
+  navigationItems[3],
+  navigationItems[4]
+];

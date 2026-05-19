@@ -16,8 +16,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <MobileResourceBar character={character} />
       </div>
 
-      <div className="mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
-        <DesktopSidebar items={navigationItems} pathname={pathname} />
+      <div className="mx-auto grid min-h-screen w-full max-w-[1440px] grid-cols-1 md:grid-cols-[244px_minmax(0,1fr)]">
+        <DesktopSidebar items={navigationItems} pathname={pathname} character={character} />
 
         <main className="min-w-0 px-4 pb-24 pt-24 md:px-6 md:py-6 lg:px-8">
           <div className="mx-auto w-full max-w-6xl">{children}</div>

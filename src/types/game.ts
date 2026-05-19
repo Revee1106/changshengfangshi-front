@@ -28,6 +28,8 @@ export interface CharacterProfile {
   energy: number;
   energyMax: number;
   energyNextRecoveryIn: string;
+  energyRecoveryRemainingSeconds?: number;
+  energyRecoveryAmountWeeks?: number;
   energyRecovery: string;
   energyFullIn: string;
   mind: number;
@@ -106,6 +108,39 @@ export interface CultivationAction {
   baseYield: string;
   sideYield: string;
   recommended?: boolean;
+}
+
+export interface MindPracticeDirection {
+  id: "gathering" | "alchemy" | "crafting" | "talisman";
+  name: string;
+  description: string;
+  unlocked: boolean;
+  requirement?: string;
+}
+
+export interface GatheringPlace {
+  id: string;
+  name: string;
+  unlocked: boolean;
+  description: string;
+  mindCost: number;
+  mainYield: string;
+  rareYield?: string;
+  risk?: string;
+  requirement?: string;
+}
+
+export type InventoryItemType = "丹药" | "灵草" | "灵矿" | "工具" | "杂物";
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  type: InventoryItemType;
+  grade: string;
+  quantity: number;
+  description: string;
+  usable: boolean;
+  sellable: boolean;
 }
 
 export interface GrowthStat {
