@@ -45,8 +45,9 @@ export const character: CharacterProfile = {
   daoHeartEffect: "修炼稳定，无额外修正",
   spiritStones: 128,
   injuryState: "无伤",
-  cultivation: 320,
+  cultivation: 500,
   cultivationRequired: 500,
+  breakthroughAvailable: true,
   bagUsed: 24,
   bagMax: 60
 };

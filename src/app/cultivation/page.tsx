@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { PageHeading } from "@/components/game/page-heading";
+import { PlaceCard } from "@/components/game/place-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -23,7 +24,6 @@ export default function CultivationPage() {
   const [selectedActionId, setSelectedActionId] = useState(cultivationActions[0].id);
   const [energyWeeks, setEnergyWeeks] = useState("50");
 
-  const selectedPlace = cultivationPlaces.find((place) => place.id === selectedPlaceId) ?? cultivationPlaces[0];
   const selectedAction =
     cultivationActions.find((action) => action.id === selectedActionId) ?? cultivationActions[0];
   const selectedEnergy = Math.max(0, Number.parseInt(energyWeeks, 10) || 0);
@@ -121,47 +121,26 @@ export default function CultivationPage() {
                 {group.places.map((place) => {
                   const selected = selectedPlaceId === place.id;
                   const Icon = place.type === "safe" ? ShieldCheck : Mountain;
+                  const details = [
+                    { label: "修炼效率", value: place.multiplier },
+                    {
+                      label: "道心变化",
+                      value: place.daoHeartChange ?? place.requirement ?? "收益稳定"
+                    },
+                    ...(place.cost ? [{ label: "解锁消耗", value: place.cost }] : []),
+                    ...(place.risk ? [{ label: "风险", value: place.risk, tone: "danger" as const }] : [])
+                  ];
 
                   return (
-                    <button
+                    <PlaceCard
                       key={place.id}
-                      type="button"
-                      className={cn(
-                        "aspect-square rounded-lg border bg-rice-50 p-3 text-center transition",
-                        selected
-                          ? "sm:col-span-2 border-jade-600 bg-white shadow-[0_14px_32px_rgba(23,82,68,0.12)] ring-2 ring-jade-500/15"
-                          : "border-stone-200 hover:border-jade-500 hover:bg-white",
-                        !place.unlocked && "cursor-not-allowed opacity-60"
-                      )}
-                      onClick={() => place.unlocked && setSelectedPlaceId(place.id)}
-                    >
-                      <div className="flex h-full flex-col items-center justify-center">
-                        <span
-                          className={cn(
-                            "flex items-center justify-center rounded-md bg-ink-800 text-rice-50 transition",
-                            selected ? "h-12 w-12" : "h-10 w-10"
-                          )}
-                        >
-                          <Icon className={selected ? "h-6 w-6" : "h-5 w-5"} aria-hidden="true" />
-                        </span>
-                        <h4 className="mt-3 text-sm font-semibold text-ink-900">{place.name}</h4>
-                        {selected ? (
-                          <div className="mt-2 space-y-1 text-xs leading-4 text-stone-600">
-                            <p>
-                              <span className="text-stone-500">修炼效率：</span>
-                              <span className="font-medium text-ink-900">{place.multiplier}</span>
-                            </p>
-                            <p>
-                              <span className="text-stone-500">道心变化：</span>
-                              <span className="font-medium text-ink-900">
-                                {place.daoHeartChange ?? place.requirement ?? "收益稳定"}
-                              </span>
-                            </p>
-                            {place.risk ? <p className="font-medium text-cinnabar-700">{place.risk}</p> : null}
-                          </div>
-                        ) : null}
-                      </div>
-                    </button>
+                      name={place.name}
+                      icon={Icon}
+                      selected={selected}
+                      unlocked={place.unlocked}
+                      details={details}
+                      onSelect={() => setSelectedPlaceId(place.id)}
+                    />
                   );
                 })}
               </div>

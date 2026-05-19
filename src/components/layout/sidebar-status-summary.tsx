@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -67,6 +68,8 @@ export function SidebarStatusSummary({ character }: SidebarStatusSummaryProps) {
   );
   const isEnergyFull = character.energy >= character.energyMax;
   const energyRecoveryText = `下次恢复：${formatCountdown(remainingSeconds)} 后 +${character.energyRecoveryAmountWeeks ?? 4} 周`;
+  const canBreakthrough =
+    character.breakthroughAvailable ?? (character.cultivation >= character.cultivationRequired);
 
   useEffect(() => {
     if (isEnergyFull || remainingSeconds <= 0) {
@@ -98,12 +101,28 @@ export function SidebarStatusSummary({ character }: SidebarStatusSummaryProps) {
 
   return (
     <section className="mb-4 rounded-lg border border-jade-700/15 bg-white/72 p-3 shadow-[0_12px_30px_rgba(21,42,40,0.06)]">
-      <div className="mb-2 flex items-end justify-between gap-2">
+      <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0 truncate text-base font-semibold leading-6 text-ink-900">
           {character.name}
         </div>
-        <div className="shrink-0 rounded-md bg-jade-50 px-2 py-0.5 text-[11px] font-medium leading-5 text-jade-700">
-          {character.realm}
+        <div className="realmStatusArea flex max-w-[132px] shrink-0 flex-wrap items-center justify-end gap-1.5">
+          <div className="rounded-md bg-jade-50 px-2 py-0.5 text-[11px] font-medium leading-5 text-jade-700">
+            {character.realm}
+          </div>
+          {canBreakthrough ? (
+            <Link
+              href="/breakthrough"
+              className="breakthroughBubbleButton group relative inline-flex min-h-[24px] items-center justify-center rounded-full border border-jade-700/45 bg-rice-50 px-2.5 text-[11px] font-semibold leading-none text-jade-800 shadow-[0_4px_12px_rgba(23,82,68,0.08)] transition hover:border-jade-700 hover:bg-white hover:text-jade-900"
+              title="修为已满，可尝试突破"
+              aria-label="修为已满，可尝试突破"
+            >
+              可突破
+              <span className="absolute -bottom-1 right-3 h-2 w-2 rotate-45 border-b border-r border-jade-700/45 bg-rice-50 transition group-hover:border-jade-700 group-hover:bg-white" />
+              <span className="pointer-events-none absolute right-0 top-[calc(100%+8px)] z-30 hidden w-36 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-normal leading-5 text-stone-600 shadow-panel group-hover:block">
+                修为已满，可尝试突破
+              </span>
+            </Link>
+          ) : null}
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FlaskConical, Hammer, Leaf, MapPinned, ScrollText } from "lucide-react";
 
 import { PageHeading } from "@/components/game/page-heading";
+import { PlaceCard } from "@/components/game/place-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { gatheringPlaces, mindPracticeDirections } from "@/data/mock-player";
@@ -81,56 +82,27 @@ export default function MindPage() {
           </div>
 
           <div className="rounded-lg border border-stone-200 bg-white/72 p-3 shadow-panel">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10">
               {gatheringPlaces.map((place) => {
                 const selected = selectedPlaceId === place.id;
+                const details = [
+                  { label: "心神消耗", value: place.mindCost },
+                  { label: "主要产物", value: place.mainYield },
+                  ...(place.rareYield ? [{ label: "稀有产物", value: place.rareYield }] : []),
+                  ...(place.requirement ? [{ label: "解锁条件", value: place.requirement }] : []),
+                  ...(place.risk ? [{ label: "风险", value: place.risk, tone: "danger" as const }] : [])
+                ];
 
                 return (
-                  <button
+                  <PlaceCard
                     key={place.id}
-                    type="button"
-                    className={cn(
-                      "aspect-square rounded-lg border bg-rice-50 p-3 text-center transition",
-                      selected
-                        ? "sm:col-span-2 border-jade-600 bg-white shadow-[0_14px_32px_rgba(23,82,68,0.12)] ring-2 ring-jade-500/15"
-                        : "border-stone-200 hover:border-jade-500 hover:bg-white",
-                      !place.unlocked && "cursor-not-allowed opacity-60"
-                    )}
-                    onClick={() => place.unlocked && setSelectedPlaceId(place.id)}
-                  >
-                    <div className="flex h-full flex-col items-center justify-center">
-                      <span
-                        className={cn(
-                          "flex items-center justify-center rounded-md bg-ink-800 text-rice-50 transition",
-                          selected ? "h-12 w-12" : "h-10 w-10"
-                        )}
-                      >
-                        <MapPinned className={selected ? "h-6 w-6" : "h-5 w-5"} aria-hidden="true" />
-                      </span>
-                      <h3 className="mt-3 text-sm font-semibold text-ink-900">{place.name}</h3>
-                      {selected ? (
-                        <div className="mt-2 space-y-1 text-xs leading-4 text-stone-600">
-                          <p>
-                            <span className="text-stone-500">心神消耗：</span>
-                            <span className="font-medium text-ink-900">{place.mindCost}</span>
-                          </p>
-                          <p>
-                            <span className="text-stone-500">主要产物：</span>
-                            <span className="font-medium text-ink-900">{place.mainYield}</span>
-                          </p>
-                          {place.rareYield ? (
-                            <p>
-                              <span className="text-stone-500">稀有产物：</span>
-                              <span className="font-medium text-ink-900">{place.rareYield}</span>
-                            </p>
-                          ) : null}
-                          {place.risk ? (
-                            <p className="font-medium text-cinnabar-700">{place.risk}</p>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </div>
-                  </button>
+                    name={place.name}
+                    icon={MapPinned}
+                    selected={selected}
+                    unlocked={place.unlocked}
+                    details={details}
+                    onSelect={() => setSelectedPlaceId(place.id)}
+                  />
                 );
               })}
             </div>

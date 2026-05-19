@@ -40,6 +40,7 @@ export interface CharacterProfile {
   injuryState: string;
   cultivation: number;
   cultivationRequired: number;
+  breakthroughAvailable?: boolean;
   bagUsed: number;
   bagMax: number;
 }
