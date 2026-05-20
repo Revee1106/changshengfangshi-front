@@ -3,11 +3,50 @@ import Link from "next/link";
 import { BreakthroughRiskCard } from "@/components/game/breakthrough-risk-card";
 import { PageHeading } from "@/components/game/page-heading";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { character } from "@/data/mock-player";
+import { apiClient, fallbackData, readApi } from "@/lib/api-client";
 
-export default function BreakthroughPage() {
-  const canBreakthrough =
-    character.breakthroughAvailable ?? (character.cultivation >= character.cultivationRequired);
+export const dynamic = "force-dynamic";
+
+export default async function BreakthroughPage() {
+  const breakthrough = await readApi(
+    () => apiClient.breakthroughCurrent(),
+    {
+      canBreakthrough:
+        fallbackData.character.breakthroughAvailable ??
+        (fallbackData.character.cultivation >= fallbackData.character.cultivationRequired),
+      currentRealm: fallbackData.character.realm,
+      currentRealmKey: "",
+      targetRealm: fallbackData.character.nextRealm,
+      targetRealmKey: "",
+      cultivation: fallbackData.character.cultivation,
+      cultivationRequired: fallbackData.character.cultivationRequired,
+      rates: {
+        baseSuccessRate: 68,
+        daoHeartBonus: 3,
+        randomCorrectionMin: -5,
+        randomCorrectionMax: 5,
+        minFinalRate: 5,
+        maxFinalRate: 95
+      },
+      availablePills: [
+        {
+          id: "condensed-origin-pill",
+          name: "凝元丹",
+          quantity: 1,
+          successBonus: 10,
+          description: "温养经脉，辅助炼气期小境界突破。"
+        },
+        {
+          id: "clear-heart-pill",
+          name: "清心丹",
+          quantity: 2,
+          successBonus: 6,
+          description: "稳住心神，降低突破时气息紊乱的概率。"
+        }
+      ]
+    }
+  );
+  const canBreakthrough = breakthrough.canBreakthrough;
 
   return (
     <>
@@ -20,7 +59,12 @@ export default function BreakthroughPage() {
 
       <section className="relative mx-auto w-full max-w-[860px]">
         <div className={!canBreakthrough ? "pointer-events-none blur-sm" : undefined}>
-          <BreakthroughRiskCard canBreakthrough={canBreakthrough} />
+          <BreakthroughRiskCard
+            canBreakthrough={canBreakthrough}
+            baseSuccessRate={breakthrough.rates.baseSuccessRate}
+            daoHeartBonus={breakthrough.rates.daoHeartBonus}
+            availablePills={breakthrough.availablePills}
+          />
         </div>
 
         {!canBreakthrough ? (

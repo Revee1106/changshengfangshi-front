@@ -1,12 +1,3 @@
-import {
-  Brain,
-  Flame,
-  Home,
-  Package,
-  Leaf,
-  UserRound
-} from "lucide-react";
-
 import type {
   Attribute,
   CharacterProfile,
@@ -20,6 +11,13 @@ import type {
   NavigationItem,
   ResourceSummary
 } from "@/types/game";
+import {
+  CultivationIcon,
+  HomeIcon,
+  MindIcon,
+  PackageIcon,
+  UserRoundIcon
+} from "@/components/game/game-icons";
 
 export const character: CharacterProfile = {
   name: "王长生",
@@ -396,17 +394,17 @@ export const inventoryItems: InventoryItem[] = [
 ];
 
 export const navigationItems: NavigationItem[] = [
-  { label: "总览", href: "/", icon: Home },
-  { label: "修炼", href: "/cultivation", icon: Flame },
-  { label: "心神", href: "/mind", icon: Brain },
-  { label: "行囊", href: "/inventory", icon: Package },
-  { label: "角色", href: "/character", icon: UserRound }
+  { label: "总览", href: "/", icon: HomeIcon },
+  { label: "修炼", href: "/cultivation", icon: CultivationIcon },
+  { label: "心神", href: "/mind", icon: MindIcon },
+  { label: "行囊", href: "/inventory", icon: PackageIcon },
+  { label: "角色", href: "/character", icon: UserRoundIcon }
 ];
 
 export const mobileNavigationItems: NavigationItem[] = [
   navigationItems[0],
   navigationItems[1],
-  { label: "心神", href: "/mind", icon: Leaf },
+  { label: "心神", href: "/mind", icon: MindIcon },
   navigationItems[3],
   navigationItems[4]
 ];

@@ -1,4 +1,6 @@
-import type { LucideIcon } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
+
+export type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 export type ResourceKey =
   | "寿数"
@@ -83,7 +85,7 @@ export interface AlertItem {
 export interface NavigationItem {
   label: string;
   href: string;
-  icon: LucideIcon;
+  icon: IconComponent;
 }
 
 export type PlaceType = "safe" | "wild";

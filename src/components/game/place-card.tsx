@@ -1,6 +1,5 @@
-import type { LucideIcon } from "lucide-react";
-
 import { cn } from "@/lib/utils";
+import type { IconComponent } from "@/types/game";
 
 interface PlaceDetail {
   label: string;
@@ -10,7 +9,7 @@ interface PlaceDetail {
 
 interface PlaceCardProps {
   name: string;
-  icon: LucideIcon;
+  icon: IconComponent;
   selected: boolean;
   unlocked: boolean;
   details: PlaceDetail[];

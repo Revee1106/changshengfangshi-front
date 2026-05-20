@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Leaf } from "lucide-react";
 
 import { SidebarStatusSummary } from "@/components/layout/sidebar-status-summary";
+import { LotusIcon } from "@/components/game/game-icons";
 import type { CharacterProfile, NavigationItem } from "@/types/game";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ export function DesktopSidebar({ items, pathname, character }: DesktopSidebarPro
     <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-stone-200/80 bg-rice-50/82 px-3 py-5 backdrop-blur md:block">
       <Link href="/" className="mb-4 flex items-center gap-3 rounded-lg px-2 py-2">
         <span className="flex h-10 w-10 items-center justify-center rounded-md bg-ink-800 text-rice-50">
-          <Leaf className="h-5 w-5" aria-hidden="true" />
+          <LotusIcon className="h-5 w-5" aria-hidden="true" />
         </span>
         <span>
           <span className="block text-base font-semibold text-ink-900">长生坊市</span>

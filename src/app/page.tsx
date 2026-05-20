@@ -1,9 +1,25 @@
 import { PageHeading } from "@/components/game/page-heading";
 import { LogList } from "@/components/game/log-list";
+import {
+  BodyIcon,
+  DivineSenseIcon,
+  ManaIcon,
+  MovementIcon
+} from "@/components/game/game-icons";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { attributes, recentLogs } from "@/data/mock-player";
+import { apiClient, fallbackData, readApi } from "@/lib/api-client";
+import type { Attribute, IconComponent } from "@/types/game";
 
-function AttributePanel() {
+export const dynamic = "force-dynamic";
+
+const attributeIcons = {
+  法力: ManaIcon,
+  神识: DivineSenseIcon,
+  体魄: BodyIcon,
+  遁法: MovementIcon
+} satisfies Record<Attribute["key"], IconComponent>;
+
+function AttributePanel({ attributes }: { attributes: Attribute[] }) {
   return (
     <Card className="h-full border-jade-700/20 bg-white text-ink-900">
       <CardHeader>
@@ -14,24 +30,40 @@ function AttributePanel() {
       </CardHeader>
       <CardBody>
         <div className="grid grid-cols-2 gap-3">
-          {attributes.map((attribute) => (
-            <details key={attribute.key} className="group relative min-w-0">
-              <summary className="flex min-h-[110px] cursor-pointer list-none flex-col justify-center rounded-md border border-stone-200 bg-rice-50 px-3 py-2 [&::-webkit-details-marker]:hidden">
-                <span className="text-xs text-stone-500">{attribute.key}</span>
-                <span className="mt-1 text-xl font-semibold text-ink-900">{attribute.value}</span>
-              </summary>
-              <div className="absolute left-0 top-[calc(100%+8px)] z-20 hidden w-64 rounded-lg border border-stone-200 bg-white p-3 text-xs leading-5 text-stone-600 shadow-panel group-open:block md:group-hover:block">
-                {attribute.description}
-              </div>
-            </details>
-          ))}
+          {attributes.map((attribute) => {
+            const Icon = attributeIcons[attribute.key];
+
+            return (
+              <details key={attribute.key} className="group relative min-w-0">
+                <summary className="flex min-h-[110px] cursor-pointer list-none flex-col justify-center rounded-md border border-stone-200 bg-rice-50 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md bg-jade-50 text-jade-700">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="mt-2 text-xs text-stone-500">{attribute.key}</span>
+                  <span className="mt-1 text-xl font-semibold text-ink-900">{attribute.value}</span>
+                </summary>
+                <div className="absolute left-0 top-[calc(100%+8px)] z-20 hidden w-64 rounded-lg border border-stone-200 bg-white p-3 text-xs leading-5 text-stone-600 shadow-panel group-open:block md:group-hover:block">
+                  {attribute.description}
+                </div>
+              </details>
+            );
+          })}
         </div>
       </CardBody>
     </Card>
   );
 }
 
-export default function OverviewPage() {
+export default async function OverviewPage() {
+  const overview = await readApi(
+    () => apiClient.overview(5),
+    {
+      character: fallbackData.character,
+      attributes: fallbackData.attributes,
+      recentLogs: fallbackData.recentLogs
+    }
+  );
+
   return (
     <>
       <PageHeading
@@ -40,7 +72,7 @@ export default function OverviewPage() {
       />
 
       <section>
-        <AttributePanel />
+        <AttributePanel attributes={overview.attributes} />
       </section>
 
       <section className="mt-6">
@@ -49,7 +81,7 @@ export default function OverviewPage() {
             <h2 className="text-base font-semibold text-ink-900">最近日志</h2>
           </CardHeader>
           <CardBody>
-            <LogList logs={recentLogs.slice(0, 5)} />
+            <LogList logs={overview.recentLogs.slice(0, 5)} />
           </CardBody>
         </Card>
       </section>

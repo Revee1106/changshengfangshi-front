@@ -4,14 +4,21 @@ import { ResourceCard } from "@/components/game/resource-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import {
-  attributes,
-  character,
-  growthStats,
-  resources
-} from "@/data/mock-player";
+import { apiClient, fallbackData, readApi } from "@/lib/api-client";
 
-export default function CharacterPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CharacterPage() {
+  const profile = await readApi(
+    () => apiClient.characterProfile(),
+    {
+      character: fallbackData.character,
+      attributes: fallbackData.attributes,
+      resources: fallbackData.resources,
+      growthStats: fallbackData.growthStats
+    }
+  );
+  const { attributes, character, growthStats, resources } = profile;
   const cultivationProgress = Math.round(
     (character.cultivation / character.cultivationRequired) * 100
   );

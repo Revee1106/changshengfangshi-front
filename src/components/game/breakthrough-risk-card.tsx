@@ -6,6 +6,7 @@ import { AlertTriangle, Pill, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 
 interface BreakthroughPill {
@@ -16,48 +17,47 @@ interface BreakthroughPill {
   description: string;
 }
 
-const baseSuccessRate = 68;
-const daoHeartBonus = 3;
-
-const availablePills: BreakthroughPill[] = [
-  {
-    id: "condensed-origin-pill",
-    name: "凝元丹",
-    quantity: 1,
-    successBonus: 10,
-    description: "温养经脉，辅助练气期小境界突破。"
-  },
-  {
-    id: "clear-heart-pill",
-    name: "清心丹",
-    quantity: 2,
-    successBonus: 6,
-    description: "稳住心神，降低突破时气息紊乱的概率。"
-  }
-];
-
 interface BreakthroughRiskCardProps {
   canBreakthrough: boolean;
+  baseSuccessRate: number;
+  daoHeartBonus: number;
+  availablePills: BreakthroughPill[];
 }
 
-export function BreakthroughRiskCard({ canBreakthrough }: BreakthroughRiskCardProps) {
+export function BreakthroughRiskCard({
+  canBreakthrough,
+  baseSuccessRate,
+  daoHeartBonus,
+  availablePills
+}: BreakthroughRiskCardProps) {
   const [selectedPillId, setSelectedPillId] = useState<string | null>(null);
   const [isBreakingThrough, setIsBreakingThrough] = useState(false);
+  const [resultText, setResultText] = useState("");
 
   const selectedPill = availablePills.find((pill) => pill.id === selectedPillId);
   const pillBonus = selectedPill?.successBonus ?? 0;
   const expectedSuccessRate = useMemo(
     () => baseSuccessRate + pillBonus + daoHeartBonus,
-    [pillBonus]
+    [baseSuccessRate, daoHeartBonus, pillBonus]
   );
 
   function togglePill(pillId: string) {
     setSelectedPillId((currentId) => (currentId === pillId ? null : pillId));
+    setResultText("");
   }
 
-  function startBreakthrough() {
+  async function startBreakthrough() {
     setIsBreakingThrough(true);
-    window.setTimeout(() => setIsBreakingThrough(false), 900);
+    setResultText("");
+
+    try {
+      const result = await apiClient.attemptBreakthrough(selectedPillId ?? undefined);
+      setResultText(result.resultText);
+    } catch (error) {
+      setResultText(error instanceof Error ? error.message : "突破失败，请稍后再试");
+    } finally {
+      setIsBreakingThrough(false);
+    }
   }
 
   return (
@@ -150,9 +150,11 @@ export function BreakthroughRiskCard({ canBreakthrough }: BreakthroughRiskCardPr
         <div className="mt-5 border-t border-stone-200 pt-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-stone-500">
-              {selectedPill
-                ? `已选择 ${selectedPill.name}，本次突破预计成功率 ${expectedSuccessRate}%。`
-                : "未选择突破丹药，将以当前成功率直接尝试突破。"}
+              {resultText
+                ? resultText
+                : selectedPill
+                  ? `已选择 ${selectedPill.name}，本次突破预计成功率 ${expectedSuccessRate}%。`
+                  : "未选择突破丹药，将以当前成功率直接尝试突破。"}
             </p>
             <Button
               icon={Sparkles}
